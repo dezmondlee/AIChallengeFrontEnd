@@ -1,0 +1,61 @@
+import streamlit as st
+import pathlib
+import json
+import requests
+
+# Function to classify sentences using the Claude API
+def classify_sentences(document_text, security_guide):
+    # Here you would connect to the Claude API to classify the sentences
+    # For demonstration, let's assume we send a request to the API
+    # and receive a response with classifications and confidence levels.
+    
+    # Example API call (replace with actual API details)
+    response = requests.post(
+        "https://api.claude.ai/classify",  # Replace with actual API endpoint
+        json={"text": document_text, "guide": security_guide}
+    )
+    
+    if response.status_code == 200:
+        return response.json()  # Assuming the response is in JSON format
+    else:
+        st.error("Error in classification API call.")
+        return []
+
+# Streamlit UI
+st.markdown(
+    "<h1 style='text-align: center; '>Elk Classification Guide</h1>", unsafe_allow_html=True
+)
+
+st.markdown(
+    "<h6 style='text-align: center; color: #FFA500 '>Protect The Herd !</h6>",
+    unsafe_allow_html=True
+)
+
+st.write("This website can be used to quickly and effectively make suggestions on blah blah blah insert more text here on greatness and glory!")
+
+# First file uploader for the document to be classified
+file = st.file_uploader("Upload the document to be classified here.")
+if file is not None:
+    document_text = file.read().decode("utf-8")  # Read the document text
+
+# Second file uploader for the security classification guide
+security_guide_file = st.file_uploader("Upload the security classification guide here.")
+if security_guide_file is not None:
+    security_guide = security_guide_file.read().decode("utf-8")  # Read the security guide text
+
+    # Button to submit both files for classification
+    if st.button("Submit for Classification"):
+        if 'document_text' in locals():
+            classifications = classify_sentences(document_text, security_guide)
+            
+            # Display the classifications with highlighting
+            for sentence in classifications:
+                sentence_text = sentence['text']
+                confidence = sentence['confidence']
+                classification = sentence['classification']
+                
+                # Highlighting based on classification
+                color = "#FF0000" if classification == "Top Secret" else "#FFA500" if classification == "Confidential" else "#00FF00"
+                st.markdown(f"<p style='color: {color};'>[{confidence}%] {sentence_text} - {classification}</p>", unsafe_allow_html=True)
+        else:
+            st.warning("Please upload a document to classify.")
